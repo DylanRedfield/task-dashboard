@@ -6,6 +6,8 @@ interface TaskCardProps {
   task: Task;
   onStatusChange: (taskId: number, status: string) => void;
   onRefresh: () => void;
+  onDragStart: (task: Task) => void;
+  onDragEnd: () => void;
 }
 
 const priorityColors = {
@@ -15,7 +17,7 @@ const priorityColors = {
   urgent: 'bg-red-200 text-red-700',
 };
 
-export default function TaskCard({ task, onStatusChange, onRefresh }: TaskCardProps) {
+export default function TaskCard({ task, onStatusChange, onRefresh, onDragStart, onDragEnd }: TaskCardProps) {
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this task?')) return;
 
@@ -30,7 +32,12 @@ export default function TaskCard({ task, onStatusChange, onRefresh }: TaskCardPr
   };
 
   return (
-    <div className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-200">
+    <div
+      draggable
+      onDragStart={() => onDragStart(task)}
+      onDragEnd={onDragEnd}
+      className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-200 cursor-move"
+    >
       <div className="flex items-start justify-between mb-2">
         <h4 className="font-medium text-gray-900 flex-1">{task.title}</h4>
         <button
