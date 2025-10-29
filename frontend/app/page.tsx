@@ -5,6 +5,7 @@ import { getTasks, getUsers, getDashboardStats, User, Task, DashboardStats } fro
 import TaskBoard from '@/components/TaskBoard';
 import StatsPanel from '@/components/StatsPanel';
 import TranscriptUpload from '@/components/TranscriptUpload';
+import GoalsPanel from '@/components/GoalsPanel';
 import Sidebar from '@/components/Sidebar';
 import toast from 'react-hot-toast';
 
@@ -72,7 +73,12 @@ export default function Home() {
             )}
 
             {selectedView === 'board' ? (
-              <TaskBoard tasks={tasks} users={users} onRefresh={loadData} />
+              <>
+                <div className="mb-8">
+                  <GoalsPanel users={users} />
+                </div>
+                <TaskBoard tasks={tasks} users={users} onRefresh={loadData} />
+              </>
             ) : (
               <TranscriptUpload onProcessed={loadData} />
             )}

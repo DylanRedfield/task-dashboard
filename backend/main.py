@@ -8,7 +8,7 @@ from typing import List
 from datetime import datetime
 
 from database import get_db, init_db
-from models import User, Task, Project, Tag, TaskTag, MeetingTranscript, TaskStatus
+from models import User, Task, Project, Tag, TaskTag, MeetingTranscript, TaskStatus, Goal, GoalStatus
 import schemas
 from transcript_processor import process_transcript
 
@@ -298,6 +298,68 @@ def get_transcript(transcript_id: int, db: Session = Depends(get_db)):
     if not transcript:
         raise HTTPException(status_code=404, detail="Transcript not found")
     return transcript
+
+
+# ============================================================================
+# GOAL ENDPOINTS
+# ============================================================================
+
+@app.post("/goals", response_model=schemas.Goal, status_code=status.HTTP_201_CREATED)
+def create_goal(goal: schemas.GoalCreate, db: Session = Depends(get_db)):
+    """Create a new goal"""
+    new_goal = Goal(**goal.dict())
+    db.add(new_goal)
+    db.commit()
+    db.refresh(new_goal)
+    return new_goal
+
+
+@app.get("/goals", response_model=List[schemas.Goal])
+def get_goals(db: Session = Depends(get_db)):
+    """Get all goals"""
+    return db.query(Goal).order_by(Goal.created_at.desc()).all()
+
+
+@app.get("/goals/{goal_id}", response_model=schemas.Goal)
+def get_goal(goal_id: int, db: Session = Depends(get_db)):
+    """Get goal by ID"""
+    goal = db.query(Goal).filter(Goal.id == goal_id).first()
+    if not goal:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    return goal
+
+
+@app.patch("/goals/{goal_id}", response_model=schemas.Goal)
+def update_goal(goal_id: int, goal_update: schemas.GoalUpdate, db: Session = Depends(get_db)):
+    """Update a goal"""
+    goal = db.query(Goal).filter(Goal.id == goal_id).first()
+    if not goal:
+        raise HTTPException(status_code=404, detail="Goal not found")
+
+    update_data = goal_update.dict(exclude_unset=True)
+
+    # If status is being changed to achieved, set completed_at
+    if "status" in update_data and update_data["status"] == GoalStatus.ACHIEVED:
+        update_data["completed_at"] = datetime.utcnow()
+
+    for key, value in update_data.items():
+        setattr(goal, key, value)
+
+    db.commit()
+    db.refresh(goal)
+    return goal
+
+
+@app.delete("/goals/{goal_id}")
+def delete_goal(goal_id: int, db: Session = Depends(get_db)):
+    """Delete a goal"""
+    goal = db.query(Goal).filter(Goal.id == goal_id).first()
+    if not goal:
+        raise HTTPException(status_code=404, detail="Goal not found")
+
+    db.delete(goal)
+    db.commit()
+    return {"message": "Goal deleted successfully"}
 
 
 # ============================================================================

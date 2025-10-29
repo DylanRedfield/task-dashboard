@@ -4,7 +4,7 @@ Pydantic schemas for request/response validation
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
-from models import TaskStatus, TaskPriority
+from models import TaskStatus, TaskPriority, GoalStatus
 
 
 # User schemas
@@ -129,6 +129,38 @@ class MeetingTranscript(BaseModel):
     created_at: datetime
     processed_at: Optional[datetime] = None
     actions: List[TranscriptAction] = []
+
+    class Config:
+        from_attributes = True
+
+
+# Goal schemas
+class GoalBase(BaseModel):
+    title: str
+    description: Optional[str] = None
+    status: GoalStatus = GoalStatus.NOT_STARTED
+    owner_id: Optional[int] = None
+    target_date: Optional[datetime] = None
+
+
+class GoalCreate(GoalBase):
+    pass
+
+
+class GoalUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[GoalStatus] = None
+    owner_id: Optional[int] = None
+    target_date: Optional[datetime] = None
+
+
+class Goal(GoalBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    completed_at: Optional[datetime] = None
+    owner: Optional[User] = None
 
     class Config:
         from_attributes = True

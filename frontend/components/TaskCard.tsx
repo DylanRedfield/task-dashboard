@@ -8,6 +8,7 @@ interface TaskCardProps {
   onRefresh: () => void;
   onDragStart: (task: Task) => void;
   onDragEnd: () => void;
+  onTaskClick: (taskId: number) => void;
 }
 
 const priorityColors = {
@@ -17,8 +18,9 @@ const priorityColors = {
   urgent: 'bg-red-200 text-red-700',
 };
 
-export default function TaskCard({ task, onStatusChange, onRefresh, onDragStart, onDragEnd }: TaskCardProps) {
-  const handleDelete = async () => {
+export default function TaskCard({ task, onStatusChange, onRefresh, onDragStart, onDragEnd, onTaskClick }: TaskCardProps) {
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!confirm('Are you sure you want to delete this task?')) return;
 
     try {
@@ -31,18 +33,23 @@ export default function TaskCard({ task, onStatusChange, onRefresh, onDragStart,
     }
   };
 
+  const handleClick = () => {
+    onTaskClick(task.id);
+  };
+
   return (
     <div
       draggable
       onDragStart={() => onDragStart(task)}
       onDragEnd={onDragEnd}
-      className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-200 cursor-move"
+      onClick={handleClick}
+      className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-all border border-gray-200 cursor-pointer"
     >
       <div className="flex items-start justify-between mb-2">
         <h4 className="font-medium text-gray-900 flex-1">{task.title}</h4>
         <button
           onClick={handleDelete}
-          className="text-gray-400 hover:text-red-600 transition-colors ml-2"
+          className="text-gray-400 hover:text-red-600 transition-colors ml-2 z-10"
           title="Delete task"
         >
           <FiTrash2 size={16} />

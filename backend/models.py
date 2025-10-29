@@ -25,6 +25,13 @@ class TaskPriority(str, enum.Enum):
     URGENT = "urgent"
 
 
+class GoalStatus(str, enum.Enum):
+    NOT_STARTED = "not_started"
+    IN_PROGRESS = "in_progress"
+    ACHIEVED = "achieved"
+    ABANDONED = "abandoned"
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -36,6 +43,7 @@ class User(Base):
     # Relationships
     assigned_tasks = relationship("Task", back_populates="assignee", foreign_keys="Task.assignee_id")
     created_tasks = relationship("Task", back_populates="creator", foreign_keys="Task.creator_id")
+    goals = relationship("Goal", back_populates="owner")
 
 
 class Project(Base):
@@ -128,3 +136,24 @@ class TranscriptAction(Base):
 
     # Relationships
     transcript = relationship("MeetingTranscript", back_populates="actions")
+
+
+class Goal(Base):
+    __tablename__ = "goals"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    description = Column(Text)
+    status = Column(Enum(GoalStatus), default=GoalStatus.NOT_STARTED, nullable=False)
+
+    # Foreign keys
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    target_date = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
+
+    # Relationships
+    owner = relationship("User", back_populates="goals")

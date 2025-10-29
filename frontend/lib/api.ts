@@ -69,6 +69,19 @@ export interface MeetingTranscript {
   actions?: TranscriptAction[];
 }
 
+export interface Goal {
+  id: number;
+  title: string;
+  description?: string;
+  status: 'not_started' | 'in_progress' | 'achieved' | 'abandoned';
+  owner_id?: number;
+  owner?: User;
+  created_at: string;
+  updated_at: string;
+  target_date?: string;
+  completed_at?: string;
+}
+
 export interface DashboardStats {
   total_tasks: number;
   todo_tasks: number;
@@ -111,6 +124,8 @@ export const getTasks = (params?: {
   project_id?: number;
 }) => api.get<Task[]>('/tasks', { params });
 
+export const getTask = (id: number) => api.get<Task>(`/tasks/${id}`);
+
 export const createTask = (data: {
   title: string;
   description?: string;
@@ -135,6 +150,20 @@ export const createTranscript = (data: { title: string; transcript: string }) =>
   api.post<MeetingTranscript>('/transcripts', data);
 export const processTranscript = (id: number) =>
   api.post(`/transcripts/${id}/process`);
+
+// Goals
+export const getGoals = () => api.get<Goal[]>('/goals');
+export const getGoal = (id: number) => api.get<Goal>(`/goals/${id}`);
+export const createGoal = (data: {
+  title: string;
+  description?: string;
+  status?: string;
+  owner_id?: number;
+  target_date?: string;
+}) => api.post<Goal>('/goals', data);
+export const updateGoal = (id: number, data: Partial<Goal>) =>
+  api.patch<Goal>(`/goals/${id}`, data);
+export const deleteGoal = (id: number) => api.delete(`/goals/${id}`);
 
 // Stats
 export const getDashboardStats = () => api.get<DashboardStats>('/stats');

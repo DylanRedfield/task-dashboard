@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Task, User, updateTask, createTask } from '@/lib/api';
 import TaskCard from './TaskCard';
 import CreateTaskModal from './CreateTaskModal';
+import TaskDetailModal from './TaskDetailModal';
 import toast from 'react-hot-toast';
 import { FiPlus, FiFilter } from 'react-icons/fi';
 
@@ -16,9 +17,7 @@ interface TaskBoardProps {
 const COLUMNS = [
   { id: 'todo', label: 'To Do', color: 'gray' },
   { id: 'in_progress', label: 'In Progress', color: 'blue' },
-  { id: 'in_review', label: 'In Review', color: 'yellow' },
   { id: 'done', label: 'Done', color: 'green' },
-  { id: 'blocked', label: 'Blocked', color: 'red' },
 ] as const;
 
 export default function TaskBoard({ tasks, users, onRefresh }: TaskBoardProps) {
@@ -27,6 +26,8 @@ export default function TaskBoard({ tasks, users, onRefresh }: TaskBoardProps) {
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<number | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   const handleStatusChange = async (taskId: number, newStatus: string) => {
     try {
@@ -69,6 +70,11 @@ export default function TaskBoard({ tasks, users, onRefresh }: TaskBoardProps) {
     }
     setDraggedTask(null);
     setDragOverColumn(null);
+  };
+
+  const handleTaskClick = (taskId: number) => {
+    setSelectedTaskId(taskId);
+    setIsDetailModalOpen(true);
   };
 
   // Filter tasks by selected user
@@ -114,7 +120,7 @@ export default function TaskBoard({ tasks, users, onRefresh }: TaskBoardProps) {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {COLUMNS.map((column) => (
           <div
             key={column.id}
@@ -151,6 +157,7 @@ export default function TaskBoard({ tasks, users, onRefresh }: TaskBoardProps) {
                   onRefresh={onRefresh}
                   onDragStart={handleDragStart}
                   onDragEnd={handleDragEnd}
+                  onTaskClick={handleTaskClick}
                 />
               ))}
             </div>
@@ -164,6 +171,13 @@ export default function TaskBoard({ tasks, users, onRefresh }: TaskBoardProps) {
         onSuccess={onRefresh}
         users={users}
         initialStatus={selectedStatus}
+      />
+
+      <TaskDetailModal
+        taskId={selectedTaskId}
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        onRefresh={onRefresh}
       />
     </>
   );
