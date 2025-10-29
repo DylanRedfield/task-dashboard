@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { getTranscripts, createTranscript, processTranscript, MeetingTranscript } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { FiUpload, FiClock, FiCheckCircle, FiFileText } from 'react-icons/fi';
@@ -10,6 +11,7 @@ interface TranscriptUploadProps {
 }
 
 export default function TranscriptUpload({ onProcessed }: TranscriptUploadProps) {
+  const router = useRouter();
   const [transcripts, setTranscripts] = useState<MeetingTranscript[]>([]);
   const [loading, setLoading] = useState(false);
   const [processing, setProcessing] = useState<number | null>(null);
@@ -153,14 +155,15 @@ export default function TranscriptUpload({ onProcessed }: TranscriptUploadProps)
             transcripts.map((transcript) => (
               <div
                 key={transcript.id}
-                className="border border-gray-200 rounded-lg p-4 hover:border-primary-300 transition-colors"
+                onClick={() => router.push(`/transcripts/${transcript.id}`)}
+                className="border border-gray-200 rounded-lg p-4 hover:border-primary-300 hover:shadow-md transition-all cursor-pointer"
               >
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="font-medium text-gray-900">{transcript.title}</h3>
                   {transcript.processed ? (
-                    <FiCheckCircle className="text-green-500" size={18} />
+                    <FiCheckCircle className="text-green-500 flex-shrink-0" size={18} />
                   ) : (
-                    <FiClock className="text-gray-400" size={18} />
+                    <FiClock className="text-gray-400 flex-shrink-0" size={18} />
                   )}
                 </div>
 
@@ -177,7 +180,10 @@ export default function TranscriptUpload({ onProcessed }: TranscriptUploadProps)
 
                 {!transcript.processed && (
                   <button
-                    onClick={() => handleProcessExisting(transcript.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleProcessExisting(transcript.id);
+                    }}
                     disabled={processing === transcript.id}
                     className="text-sm text-primary-600 hover:text-primary-700 font-medium disabled:opacity-50"
                   >

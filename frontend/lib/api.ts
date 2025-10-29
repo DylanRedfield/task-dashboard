@@ -50,6 +50,14 @@ export interface Task {
   tags?: Tag[];
 }
 
+export interface TranscriptAction {
+  id: number;
+  action_type: string;
+  description: string;
+  task_id?: number;
+  created_at: string;
+}
+
 export interface MeetingTranscript {
   id: number;
   title: string;
@@ -58,6 +66,7 @@ export interface MeetingTranscript {
   processed: boolean;
   created_at: string;
   processed_at?: string;
+  actions?: TranscriptAction[];
 }
 
 export interface DashboardStats {
@@ -121,6 +130,7 @@ export const deleteTask = (id: number) => api.delete(`/tasks/${id}`);
 
 // Transcripts
 export const getTranscripts = () => api.get<MeetingTranscript[]>('/transcripts');
+export const getTranscript = (id: number) => api.get<MeetingTranscript>(`/transcripts/${id}`);
 export const createTranscript = (data: { title: string; transcript: string }) =>
   api.post<MeetingTranscript>('/transcripts', data);
 export const processTranscript = (id: number) =>
