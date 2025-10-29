@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Fragment } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { User, createTask } from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -29,6 +29,16 @@ export default function CreateTaskModal({
     assignee_id: '',
   });
   const [loading, setLoading] = useState(false);
+
+  // Update status when modal opens or initialStatus changes
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(prev => ({
+        ...prev,
+        status: initialStatus,
+      }));
+    }
+  }, [isOpen, initialStatus]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

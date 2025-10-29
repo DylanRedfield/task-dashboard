@@ -61,8 +61,8 @@ export default function GoalsPanel({ users }: GoalsPanelProps) {
       await createGoal({
         title: formData.title,
         description: formData.description || undefined,
-        target_date: formData.target_date || undefined,
-        owner_id: formData.owner_id || undefined,
+        target_date: formData.target_date ? `${formData.target_date}T00:00:00` : undefined,
+        owner_id: formData.owner_id > 0 ? formData.owner_id : undefined,
         status: 'not_started',
       });
       toast.success('Goal created');
